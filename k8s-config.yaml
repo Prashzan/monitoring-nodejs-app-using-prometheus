@@ -38,3 +38,27 @@ spec:
     protocol: TCP
     port: 3000
     targetPort: 3000
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: monitoring-node-app
+  labels:
+    release: monitoring
+    app: nodeapp
+spec:
+  endpoints:
+  - path: /metrics
+    port: service
+    targetPort: 3000
+    # service monitor and nodejs app is in default namespace and prometheus stack is in monitoring namespace,
+    # so when they are in different namespace, we need to explicitly cofigure service monitor with namespaceSelector attribute
+    # so that servie monitor can be discovered by prometheus in another namespace
+  
+  namespaceSelector:
+    matchNames:
+    # namespace is default for service monitor and nodejs app so it is searching for nodejs app in default namespace
+    - default 
+  selector:
+    matchLabels:
+      app: nodeapp
